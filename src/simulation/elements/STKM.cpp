@@ -53,7 +53,8 @@ void Element::Element_STKM()
 	HighTemperatureTransition = PT_FIRE;
 
 	DefaultProperties.life = 100;
-
+	DefaultProperties.tmp2 = 300;
+	
 	Update = &update;
 	Graphics = &Element_STKM_graphics;
 	Create = &create;
@@ -263,7 +264,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 				moved = true;
 			}
 		}
-		if (!moved && playerp->rocketBoots)
+		if (!moved)
 		{
 			parts[i].vx -= rocketBootsHeadEffect*rby;
 			parts[i].vy += rocketBootsHeadEffect*rbx;
@@ -271,17 +272,20 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 			playerp->accs[6] -= rocketBootsFeetEffect*rby;
 			playerp->accs[3] += rocketBootsFeetEffect*rbx;
 			playerp->accs[7] += rocketBootsFeetEffect*rbx;
-			for (int leg=0; leg<2; leg++)
+			if (playerp->rocketBoots)
 			{
-				if (leg==1 && (((int)(playerp->comm)&0x02) == 0x02))
-					continue;
-				int footX = int(playerp->legs[leg*8+4]), footY = int(playerp->legs[leg*8+5]);
-				int np = sim->create_part(-1, footX, footY, PT_PLSM);
-				if (np>=0)
+				for (int leg=0; leg<2; leg++)
 				{
-					parts[np].vx = parts[i].vx+rby*25;
-					parts[np].vy = parts[i].vy-rbx*25;
-					parts[np].life += 30;
+					if (leg==1 && (((int)(playerp->comm)&0x02) == 0x02))
+						continue;
+					int footX = int(playerp->legs[leg*8+4]), footY = int(playerp->legs[leg*8+5]);
+					int np = sim->create_part(-1, footX, footY, PT_PLSM);
+					if (np>=0)
+					{
+						parts[np].vx = parts[i].vx+rby*25;
+						parts[np].vy = parts[i].vy-rbx*25;
+						parts[np].life += 30;
+					}
 				}
 			}
 		}
@@ -313,7 +317,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 				moved = true;
 			}
 		}
-		if (!moved && playerp->rocketBoots)
+		if (!moved)
 		{
 			parts[i].vx += rocketBootsHeadEffect*rby;
 			parts[i].vy -= rocketBootsHeadEffect*rbx;
@@ -321,17 +325,20 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 			playerp->accs[6] += rocketBootsFeetEffect*rby;
 			playerp->accs[3] -= rocketBootsFeetEffect*rbx;
 			playerp->accs[7] -= rocketBootsFeetEffect*rbx;
-			for (int leg=0; leg<2; leg++)
+			if (playerp->rocketBoots)
 			{
-				if (leg==0 && (((int)(playerp->comm)&0x01) == 0x01))
-					continue;
-				int footX = int(playerp->legs[leg*8+4]), footY = int(playerp->legs[leg*8+5]);
-				int np = sim->create_part(-1, footX, footY, PT_PLSM);
-				if (np>=0)
+				for (int leg=0; leg<2; leg++)
 				{
-					parts[np].vx = parts[i].vx-rby*25;
-					parts[np].vy = parts[i].vy+rbx*25;
-					parts[np].life += 30;
+					if (leg==0 && (((int)(playerp->comm)&0x01) == 0x01))
+						continue;
+					int footX = int(playerp->legs[leg*8+4]), footY = int(playerp->legs[leg*8+5]);
+					int np = sim->create_part(-1, footX, footY, PT_PLSM);
+					if (np>=0)
+					{
+						parts[np].vx = parts[i].vx-rby*25;
+						parts[np].vy = parts[i].vy+rbx*25;
+						parts[np].life += 30;
+					}
 				}
 			}
 		}
@@ -401,8 +408,13 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 
 				if (!r && !sim->bmap[(y+ry)/CELL][(x+rx)/CELL])
 					continue;
-
-				Element_STKM_set_element(sim, playerp, TYP(r));
+				if (TYP(r) == PT_DTEC)
+				{
+					Element_STKM_set_element(sim, playerp, parts[ID(r)].ctype);
+					parts[i].tmp = parts[ID(r)].tmp;
+					parts[i].tmp2 = 300;
+				}
+				
 				if (TYP(r) == PT_PLNT && parts[i].life<100) //Plant gives him 5 HP
 				{
 					if (parts[i].life<=95)
@@ -411,7 +423,12 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 						parts[i].life = 100;
 					sim->kill_part(ID(r));
 				}
-
+				
+				if (TYP(r) == playerp->elem && parts[i].tmp2 < 300 && RNG::Ref().chance(1, 3)) // absorb ammo
+				{
+					sim->kill_part(ID(r));
+					parts[i].tmp2 += 1;
+				}
 				if (TYP(r) == PT_NEUT)
 				{
 					if (parts[i].life<=100) parts[i].life -= (102-parts[i].life)/2;
@@ -433,9 +450,12 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	//Head position
 	rx = x + 3*((((int)playerp->pcomm)&0x02) == 0x02) - 3*((((int)playerp->pcomm)&0x01) == 0x01);
 	ry = y - 3*(playerp->pcomm == 0);
-
+	
+	//Ammo count update
+	if (parts[i].tmp%2 == 0)
+		parts[i].tmp2 = 300;
 	//Spawn
-	if (((int)(playerp->comm)&0x08) == 0x08)
+	if (((int)(playerp->comm)&0x08) == 0x08 && (parts[i].tmp2 > 0))
 	{
 		ry -= 2 * RNG::Ref().between(0, 1) + 1;
 		r = pmap[ry][rx];
@@ -468,7 +488,25 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 			else if (playerp->elem==PT_LIGH && playerp->frames<30)//limit lightning creation rate
 				np = -1;
 			else
-				np = sim->create_part(-1, rx, ry, playerp->elem);
+			{
+				int ignitetype = (parts[i].tmp%8 - parts[i].tmp%2)/2; // igniter particles
+				if (!(ignitetype == 0) && RNG::Ref().chance(1, 5))
+					if (ignitetype == 1)
+						np = sim->create_part(-1, rx, ry, PT_FIRE);
+					else if (ignitetype == 2)
+						np = sim->create_part(-1, rx, ry, PT_LAVA);
+					else
+					{
+						np = sim->create_part(-1, rx, ry, PT_BCOL);
+						parts[np].life = 99;
+					}
+				else
+				{
+					np = sim->create_part(-1, rx, ry, playerp->elem);
+					if (parts[i].tmp%2 == 1)
+						parts[i].tmp2 -= 1;
+				}
+			}
 			if ( (np < NPART) && np>=0)
 			{
 				if (playerp->elem == PT_PHOT)
@@ -508,8 +546,21 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 				}
 				else if (!playerp->fan)
 				{
-					parts[np].vx -= -gvy*(5*((((int)playerp->pcomm)&0x02) == 0x02) - 5*(((int)(playerp->pcomm)&0x01) == 0x01));
-					parts[np].vy -= gvx*(5*((((int)playerp->pcomm)&0x02) == 0x02) - 5*(((int)(playerp->pcomm)&0x01) == 0x01));
+					int speedmult = 5;
+					if (sim->elements[(int)playerp->elem].Properties&TYPE_GAS) // give gasses a little boost
+					{
+						speedmult = 50;
+					}
+					if (playerp->elem == PT_FIRW) // shoot fireworks!
+					{
+						speedmult = 20;
+						parts[np].tmp = 1;
+						parts[np].life = RNG::Ref().between(10, 14);
+					}
+					parts[np].vx -= -gvy*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
+					parts[np].vy -= gvx*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
+					parts[np].vx += 3*parts[i].vx;
+					parts[np].vy += 3*parts[i].vy;
 					parts[i].vx -= (sim->elements[(int)playerp->elem].Weight*parts[np].vx)/1000;
 				}
 				playerp->frames = 0;
@@ -627,8 +678,15 @@ void Element_STKM_interact(Simulation *sim, playerst *playerp, int i, int x, int
 		{
 			sim->parts[i].life -= RNG::Ref().between(32, 51);
 		}
-
-		if (sim->elements[TYP(r)].HeatConduct && (TYP(r)!=PT_HSWC||sim->parts[ID(r)].life==10) && ((playerp->elem!=PT_LIGH && sim->parts[ID(r)].temp>=323) || sim->parts[ID(r)].temp<=243) && (!playerp->rocketBoots || TYP(r)!=PT_PLSM))
+		int heatimmunity = (sim->parts[i].tmp%24 - sim->parts[i].tmp%8)/8; // change threshold for heat damage
+		int heatthresh;
+		if (heatimmunity == 0)
+			heatthresh = 323;
+		else if (heatimmunity == 1)
+			heatthresh = 623;
+		else
+			heatthresh = 99999;
+		if (sim->elements[TYP(r)].HeatConduct && (TYP(r)!=PT_HSWC||sim->parts[ID(r)].life==10) && ((playerp->elem!=PT_LIGH && sim->parts[ID(r)].temp>=heatthresh) || sim->parts[ID(r)].temp<=243) && (!playerp->rocketBoots || TYP(r)!=PT_PLSM))
 		{
 			sim->parts[i].life -= 2;
 			playerp->accs[3] -= 1;
