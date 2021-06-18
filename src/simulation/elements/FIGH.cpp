@@ -150,8 +150,29 @@ static int update(UPDATE_FUNC_ARGS)
 	}
 
 	figh->pcomm = figh->comm;
-
+	
+	//hacky solution for figh ai compatibility; just swap out values and put them back afterwards.
+	int hackyswap;
+	hackyswap = figh->swaptmp;
+	figh->swaptmp = parts[i].tmp;
+	parts[i].tmp = hackyswap;
+	
+	hackyswap = figh->swaptmp2;
+	figh->swaptmp2 = parts[i].tmp2;
+	parts[i].tmp2 = hackyswap;
+	
+	
 	Element_STKM_run_stickman(figh, UPDATE_FUNC_SUBCALL_ARGS);
+	
+	
+	hackyswap = figh->swaptmp;
+	figh->swaptmp = parts[i].tmp;
+	parts[i].tmp = hackyswap;
+	
+	hackyswap = figh->swaptmp2;
+	figh->swaptmp2 = parts[i].tmp2;
+	parts[i].tmp2 = hackyswap;
+	
 	return 0;
 }
 

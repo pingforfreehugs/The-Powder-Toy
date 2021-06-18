@@ -502,7 +502,14 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 					}
 				else
 				{
-					np = sim->create_part(-1, rx, ry, playerp->elem);
+					if (sim->elements[(int)playerp->elem].Properties&TYPE_SOLID)
+					{
+						np = sim->create_part(-1, rx, ry, PT_FOAM);
+						parts[np].life = 30;
+						parts[np].ctype = playerp->elem;
+					}
+					else
+						np = sim->create_part(-1, rx, ry, playerp->elem);
 					if (parts[i].tmp%2 == 1)
 						parts[i].tmp2 -= 1;
 				}
@@ -782,6 +789,7 @@ void Element_STKM_set_element(Simulation *sim, playerst *playerp, int element)
 	    || sim->elements[element].Properties&TYPE_GAS
 	    || sim->elements[element].Properties&TYPE_LIQUID
 	    || sim->elements[element].Properties&TYPE_ENERGY
+	    || sim->elements[element].Properties&TYPE_SOLID
 	    || element == PT_LOLZ || element == PT_LOVE)
 	{
 		if (!playerp->rocketBoots || element != PT_PLSM)
