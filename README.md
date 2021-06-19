@@ -23,11 +23,17 @@ These settings make stickmen more resistant to damage from hot particles.
 
 ### FOAM element
  - New liquid: FOAM.
+ - Sticks to its CTYPE.
  - Hardens into its CTYPE after a short amount of time.
  - STKM can now fire solids; they will shoot foam with ctype set to the solid, it will harden some distance away.
+
+## CROS tool
+ - New tool: CROS.
+ - Crosshairs for STKM; click to make them fire at the cursor!
+ - Currently doesn't do anything for STK2 or FIGH.
 
 ### Minor stuff
  - Air control: Stickmen have control of their horizontal velocity while midair.
  - Velocity based aiming: Spawned particles inherit three times the stickman's velocity, letting you have some degree of control over where you shoot particles.
- - Gas boost: Gasses get a x10 velocity boost since otherwise they barely fly an inch forward.
+ - Gas boost: Firing gas particles also creates wind, since otherwise they barely fly an inch forward.
  - Special FIRW Interaction: Shot fireworks will be lit, and explode after a short distance.
