@@ -3,7 +3,7 @@ BoringPowder
 A mod with improvements for the STKM.
 
 ### DTEC element setting
- - Stickmen no longer set their element to any valid element they bump into
+ - Stickmen no longer set their element to any valid element they bump into.
  - Stickmen instead will set their element whenever they collide with DTEC, to the DTEC's CTYPE.
  - Stickmen will also copy the TMP value of DTEC.
 
@@ -17,9 +17,14 @@ These mutually-exclusive settings turn 20% of fired particles into "igniter" par
 +4: Igniter particles are LAVA.  
 +6: Igniter particles are burning BCOL.  
 #### Heat Immunity
-These settings make stickmen more resistant to damage from hot particles  
+These settings make stickmen more resistant to damage from hot particles.  
 +8: Increases the temperature needed to take damage by 300C.  
 +16: Complete immunity to heat damage.  
+
+### FOAM element
+ - New liquid: FOAM.
+ - Hardens into its CTYPE after a short amount of time.
+ - STKM can now fire solids; they will shoot foam with ctype set to the solid, it will harden some distance away.
 
 ### Minor stuff
  - Air control: Stickmen have control of their horizontal velocity while midair.
