@@ -554,10 +554,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 				else if (!playerp->fan)
 				{
 					int speedmult = 5;
-					if (sim->elements[(int)playerp->elem].Properties&TYPE_GAS) // give gasses a little boost
-					{
-						speedmult = 50;
-					}
+					
 					if (playerp->elem == PT_FIRW) // shoot fireworks!
 					{
 						speedmult = 20;
@@ -569,6 +566,25 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 					parts[np].vx += 3*parts[i].vx;
 					parts[np].vy += 3*parts[i].vy;
 					parts[i].vx -= (sim->elements[(int)playerp->elem].Weight*parts[np].vx)/1000;
+					
+					if (sim->elements[(int)playerp->elem].Properties&TYPE_GAS) // give gasses a little boost
+					{
+						parts[i].vx -= parts[np].vx/8;
+						parts[i].vy -= parts[np].vy/8;
+						for(int j = -4; j < 5; j++)
+							for (int k = -4; k < 5; k++)
+							{
+								int airx = rx + 3*((((int)playerp->pcomm)&0x02) == 0x02) - 3*((((int)playerp->pcomm)&0x01) == 0x01)+j;
+								int airy = ry+k;
+								if (airx > 0 && airx+CELL < XRES && airy > 0 && airy+CELL < YRES)
+									{
+										sim->vx[airy/CELL][airx/CELL] += parts[np].vx/64;
+										sim->vy[airy/CELL][airx/CELL] += parts[np].vy/64;
+									}
+								
+							}
+						
+					}
 				}
 				playerp->frames = 0;
 			}
