@@ -455,7 +455,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	if (parts[i].tmp%2 == 0)
 		parts[i].tmp2 = 300;
 	//Spawn
-	if (((int)(playerp->comm)&0x08) == 0x08 && (parts[i].tmp2 > 0))
+	if ((((int)(playerp->comm)&0x08) == 0x08 || playerp->aim) && (parts[i].tmp2 > 0))
 	{
 		ry -= 2 * RNG::Ref().between(0, 1) + 1;
 		r = pmap[ry][rx];
@@ -563,9 +563,23 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 					}
 					parts[np].vx -= -gvy*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
 					parts[np].vy -= gvx*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
-					parts[np].vx += 3*parts[i].vx;
-					parts[np].vy += 3*parts[i].vy;
+					
+					if (playerp->aim) // CROS aiming
+					{
+						float magni = sqrt(parts[np].vx*parts[np].vx + parts[np].vy*parts[np].vy);
+						parts[np].vx = magni*playerp->aimx;
+						parts[np].vy = magni*playerp->aimy;
+					}
+					else // velocity aiming
+					{
+						parts[np].vx += 3*parts[i].vx;
+						parts[np].vy += 3*parts[i].vy;
+					}
+					
 					parts[i].vx -= (sim->elements[(int)playerp->elem].Weight*parts[np].vx)/1000;
+					parts[i].vy -= (sim->elements[(int)playerp->elem].Weight*parts[np].vy)/1000;
+					
+					
 					
 					if (sim->elements[(int)playerp->elem].Properties&TYPE_GAS) // give gasses a little boost
 					{
@@ -591,6 +605,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 
 		}
 	}
+	playerp->aim = false;
 
 	//Simulation of joints
 	d = 25/(pow((playerp->legs[0]-playerp->legs[4]), 2) + pow((playerp->legs[1]-playerp->legs[5]), 2)+25) - 0.5;  //Fast distance
@@ -797,6 +812,7 @@ void Element_STKM_init_legs(Simulation * sim, playerst *playerp, int i)
 	playerp->spwn = 0;
 	playerp->fan = false;
 	playerp->rocketBoots = false;
+	playerp->aim = false;
 }
 
 void Element_STKM_set_element(Simulation *sim, playerst *playerp, int element)

@@ -60,5 +60,21 @@ static int update(UPDATE_FUNC_ARGS)
 			return 1;
 		}
 	}
+	int rx, ry, r, rt;
+	for (rx=-2; rx<3; rx++)
+		for (ry=-2; ry<3; ry++)
+			if (BOUNDS_CHECK && (rx || ry))
+			{
+				r = pmap[y+ry][x+rx];
+				if (!r)
+					continue;
+				rt = TYP(r);
+				if (rt == parts[i].ctype)
+				{
+					parts[i].vx += rx/3.0f;
+					parts[i].vy += ry/3.0f;
+				}
+			}
+	
 	return 0;
 }
