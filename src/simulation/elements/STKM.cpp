@@ -487,6 +487,8 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 			}
 			else if (playerp->elem==PT_LIGH && playerp->frames<30)//limit lightning creation rate
 				np = -1;
+			else if ((playerp->elem==PT_ARAY || playerp->elem==PT_DRAY || playerp->elem==PT_CRAY) && playerp->frames<10)//limit projectile creation rate
+				np = -1;
 			else
 			{
 				int ignitetype = (parts[i].tmp%8 - parts[i].tmp%2)/2; // igniter particles
@@ -502,7 +504,22 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 					}
 				else
 				{
-					if (sim->elements[(int)playerp->elem].Properties&TYPE_SOLID)
+					if (playerp->elem == PT_ARAY)
+					{
+						np = sim->create_part(-1, rx, ry, PT_PROJ);
+						parts[np].ctype = PT_BRAY;
+					}
+					else if (playerp->elem == PT_DRAY)
+					{
+						np = sim->create_part(-1, rx, ry, PT_PROJ);
+						parts[np].ctype = PT_DRAY;
+					}
+					else if (playerp->elem == PT_CRAY)
+					{
+						np = sim->create_part(-1, rx, ry, PT_PROJ);
+						parts[np].ctype = PT_BOMB;
+					}
+					else if (sim->elements[(int)playerp->elem].Properties&TYPE_SOLID)
 					{
 						np = sim->create_part(-1, rx, ry, PT_FOAM);
 						parts[np].life = 30;
@@ -560,6 +577,10 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 						speedmult = 20;
 						parts[np].tmp = 1;
 						parts[np].life = RNG::Ref().between(10, 14);
+					}
+					else if (parts[np].type == PT_PROJ) // shoot projectiles faster
+					{
+						speedmult = 20;
 					}
 					parts[np].vx -= -gvy*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
 					parts[np].vy -= gvx*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
