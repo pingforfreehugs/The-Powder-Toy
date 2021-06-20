@@ -487,7 +487,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 			}
 			else if (playerp->elem==PT_LIGH && playerp->frames<30)//limit lightning creation rate
 				np = -1;
-			else if ((playerp->elem==PT_ARAY || playerp->elem==PT_DRAY || playerp->elem==PT_CRAY) && playerp->frames<10)//limit projectile creation rate
+			else if ((playerp->elem==PT_ARAY || playerp->elem==PT_DRAY || playerp->elem==PT_CRAY || playerp->elem==PT_FRAY) && playerp->frames<10)//limit projectile creation rate
 				np = -1;
 			else
 			{
@@ -519,10 +519,15 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 						np = sim->create_part(-1, rx, ry, PT_PROJ);
 						parts[np].ctype = PT_BOMB;
 					}
+					else if (playerp->elem == PT_FRAY)
+					{
+						np = sim->create_part(-1, rx, ry, PT_PROJ);
+						parts[np].ctype = PT_CFLM; // ik it's supposed to be force ray but freeze ray is cooler
+					}
 					else if (sim->elements[(int)playerp->elem].Properties&TYPE_SOLID)
 					{
 						np = sim->create_part(-1, rx, ry, PT_FOAM);
-						parts[np].life = 30;
+						parts[np].life = 60;
 						parts[np].ctype = playerp->elem;
 					}
 					else

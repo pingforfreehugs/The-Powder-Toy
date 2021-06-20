@@ -78,6 +78,7 @@ static int update(UPDATE_FUNC_ARGS)
 				parts[emb].life = 5;
 				parts[emb].vx = parts[i].vx/2;
 				parts[emb].vy = parts[i].vy/2;
+				parts[emb].temp = sim->elements[parts[i].ctype].DefaultProperties.temp;
 			}
 		}
 	return 0;
