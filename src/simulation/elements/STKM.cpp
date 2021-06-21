@@ -435,6 +435,9 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 					else parts[i].life = int(parts[i].life * 0.9f);
 					sim->kill_part(ID(r));
 				}
+				if (TYP(r)==PT_EMBR && !(sim->parts[ID(r)].tmp2==(i+1)))
+					parts[i].life -= 1;
+				
 				if (sim->bmap[(ry+y)/CELL][(rx+x)/CELL]==WL_FAN)
 					playerp->fan = true;
 				else if (sim->bmap[(ry+y)/CELL][(rx+x)/CELL]==WL_EHOLE)
@@ -586,6 +589,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 					else if (parts[np].type == PT_PROJ) // shoot projectiles faster
 					{
 						speedmult = 20;
+						parts[np].tmp2 = i+1;
 					}
 					parts[np].vx -= -gvy*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
 					parts[np].vy -= gvx*(speedmult*((((int)playerp->pcomm)&0x02) == 0x02) - speedmult*(((int)(playerp->pcomm)&0x01) == 0x01));
@@ -768,6 +772,9 @@ void Element_STKM_interact(Simulation *sim, playerst *playerp, int i, int x, int
 			}
 
 		if (sim->elements[TYP(r)].Properties&PROP_RADIOACTIVE)
+			sim->parts[i].life -= 1;
+
+		if (TYP(r)==PT_EMBR && !(sim->parts[ID(r)].tmp2==(i+1)))
 			sim->parts[i].life -= 1;
 
 		if (TYP(r)==PT_PRTI && sim->parts[i].type)

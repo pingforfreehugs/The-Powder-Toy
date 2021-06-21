@@ -79,6 +79,7 @@ static int update(UPDATE_FUNC_ARGS)
 				parts[emb].vx = parts[i].vx/2;
 				parts[emb].vy = parts[i].vy/2;
 				parts[emb].temp = sim->elements[parts[i].ctype].DefaultProperties.temp;
+				parts[emb].tmp2 = parts[i].tmp2; // part of projectiles not hurting owners when fired
 			}
 		}
 	return 0;

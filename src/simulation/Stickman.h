@@ -19,6 +19,7 @@ struct playerst
 	bool aim; // whether to shoot at the cursor next frame or not
 	float aimx; // x component of where to aim
 	float aimy; // y component of where to aim
+	bool aiaimed;
 };
 
 #endif
