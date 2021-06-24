@@ -20,6 +20,7 @@ struct playerst
 	float aimx; // x component of where to aim
 	float aimy; // y component of where to aim
 	bool aiaimed;
+	unsigned char aitarget; // id of the fighter to fight if a fighter is set to fight a fighter
 };
 
 #endif

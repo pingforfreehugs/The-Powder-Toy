@@ -71,6 +71,10 @@ public:
 	playerst player2;
 	playerst fighters[MAX_FIGHTERS]; //Defined in Stickman.h
 	unsigned char fighcount; //Contains the number of fighters
+	
+	unsigned char fttd_last_id; //contains the ID of the last fighter seen by the FTTD tool
+	bool fttd_selected; //whether or not a fighter has been selected by FTTD yet
+	
 	bool gravWallChanged;
 	//Portals and Wifi
 	Particle portalp[CHANNELS][8][80];

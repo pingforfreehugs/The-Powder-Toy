@@ -37,7 +37,7 @@ void Element::Element_STKM2()
 
 	DefaultProperties.temp = R_TEMP + 14.6f + 273.15f;
 	HeatConduct = 0;
-	Description = "Second stickman. Don't kill him! Control with wasd.";
+	Description = "Second stickman. Don't kill them! Control with wasd. Give them an element using DTEC.";
 
 	Properties = PROP_NOCTYPEDRAW;
 

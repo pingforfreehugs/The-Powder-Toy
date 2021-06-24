@@ -8,6 +8,7 @@ simulation_tool_ids = [
 	[ 'MIX',  6 ],
 	[ 'CYCL', 7 ],
 	[ 'CROS', 8 ],
+	[ 'FTTD', 9 ],
 ]
 
 simulation_tool_src = []

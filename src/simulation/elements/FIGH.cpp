@@ -40,7 +40,7 @@ void Element::Element_FIGH()
 
 	DefaultProperties.temp = R_TEMP + 14.6f + 273.15f;
 	HeatConduct = 0;
-	Description = "Fighter. Tries to kill stickmen. You must first give it an element to kill him with.";
+	Description = "Fighter. Tries to kill stickmen. Note: You have to set their TMP properties with DTEC.";
 
 	Properties = PROP_NOCTYPEDRAW;
 
@@ -71,36 +71,49 @@ static int update(UPDATE_FUNC_ARGS)
 	playerst* figh = &sim->fighters[(unsigned char)parts[i].tmp];
 
 	int tarx, tary;
-
-	parts[i].tmp2 = 0; //0 - stay in place, 1 - seek a stick man
-
-	//Set target cords
-	if (sim->player2.spwn)
+	
+	if (parts[i].tmp2 == 2)
 	{
-		if (sim->player.spwn && (pow((float)sim->player.legs[2]-x, 2) + pow((float)sim->player.legs[3]-y, 2))<=
-		   (pow((float)sim->player2.legs[2]-x, 2) + pow((float)sim->player2.legs[3]-y, 2)))
+		if (sim->fighters[(unsigned char)figh->aitarget].spwn)
 		{
-			tarx = (int)sim->player.legs[2];
-			tary = (int)sim->player.legs[3];
+			tarx = (int)sim->fighters[figh->aitarget].legs[2];
+			tary = (int)sim->fighters[figh->aitarget].legs[3];
 		}
 		else
 		{
-			tarx = (int)sim->player2.legs[2];
-			tary = (int)sim->player2.legs[3];
+			parts[i].tmp2 = 0;
 		}
-		parts[i].tmp2 = 1;
 	}
-	else if (sim->player.spwn)
-	{
-		tarx = (int)sim->player.legs[2];
-		tary = (int)sim->player.legs[3];
-		parts[i].tmp2 = 1;
-	}
+	else
+		parts[i].tmp2 = 0; //0 - stay in place, 1 - seek a stick man, 2 - fight a fighter
+
+	//Set target cords
+	if (parts[i].tmp2 == 0)
+		if (sim->player2.spwn)
+		{
+			if (sim->player.spwn && (pow((float)sim->player.legs[2]-x, 2) + pow((float)sim->player.legs[3]-y, 2))<=
+			   (pow((float)sim->player2.legs[2]-x, 2) + pow((float)sim->player2.legs[3]-y, 2)))
+			{
+				tarx = (int)sim->player.legs[2];
+				tary = (int)sim->player.legs[3];
+			}
+			else
+			{
+				tarx = (int)sim->player2.legs[2];
+				tary = (int)sim->player2.legs[3];
+			}
+			parts[i].tmp2 = 1;
+		}
+		else if (sim->player.spwn)
+		{
+			tarx = (int)sim->player.legs[2];
+			tary = (int)sim->player.legs[3];
+			parts[i].tmp2 = 1;
+		}
 	int offx, offy;
 	float dist;
-	switch (parts[i].tmp2)
+	if (parts[i].tmp2 != 0)
 	{
-	case 1:
 		offx = tarx-x;
 		offy = tary-y;
 		dist = sqrt(offx*offx + offy*offy);
@@ -138,11 +151,13 @@ static int update(UPDATE_FUNC_ARGS)
 			figh->aiaimed = !figh->aiaimed;
 		}
 		figh->aim = figh->aiaimed;
-		break;
-	default:
+		
+	}
+	else
+	{
 		figh->comm = 0;
 		figh->aiaimed = false;
-		break;
+		
 	}
 
 	figh->pcomm = figh->comm;
