@@ -72,23 +72,19 @@ static int update(UPDATE_FUNC_ARGS)
 
 	int tarx, tary;
 	
-	if (parts[i].tmp2 == 2)
-	{
-		if (sim->fighters[(unsigned char)figh->aitarget].spwn)
-		{
-			tarx = (int)sim->fighters[figh->aitarget].legs[2];
-			tary = (int)sim->fighters[figh->aitarget].legs[3];
-		}
-		else
-		{
-			parts[i].tmp2 = 0;
-		}
-	}
-	else
-		parts[i].tmp2 = 0; //0 - stay in place, 1 - seek a stick man, 2 - fight a fighter
+	
+	parts[i].tmp2 = 0; //0 - stay in place, 1 - seek a stick man, 2 - fight a fighter
 
 	//Set target cords
-	if (parts[i].tmp2 == 0)
+	if (figh->aifttd && sim->fighters[(unsigned char)figh->aitarget].spwn)
+	{	
+		tarx = (int)sim->fighters[figh->aitarget].legs[2];
+		tary = (int)sim->fighters[figh->aitarget].legs[3];
+		parts[i].tmp2 = 1;
+	}
+	else
+	{
+		figh->aifttd = false;
 		if (sim->player2.spwn)
 		{
 			if (sim->player.spwn && (pow((float)sim->player.legs[2]-x, 2) + pow((float)sim->player.legs[3]-y, 2))<=
@@ -110,6 +106,7 @@ static int update(UPDATE_FUNC_ARGS)
 			tary = (int)sim->player.legs[3];
 			parts[i].tmp2 = 1;
 		}
+	}
 	int offx, offy;
 	float dist;
 	if (parts[i].tmp2 != 0)

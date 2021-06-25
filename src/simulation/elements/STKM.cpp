@@ -846,6 +846,7 @@ void Element_STKM_init_legs(Simulation * sim, playerst *playerp, int i)
 	playerp->fan = false;
 	playerp->rocketBoots = false;
 	playerp->aim = false;
+	playerp->aifttd = false;
 }
 
 void Element_STKM_set_element(Simulation *sim, playerst *playerp, int element)

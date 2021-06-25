@@ -20,7 +20,6 @@ static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX,
 		return 0;
 	else if (cpart->type == PT_FIGH)
 	{
-		cpart->tmp2 = 2;
 		playerst* figh1 = &sim->fighters[(unsigned char)cpart->tmp];
 		if (!sim->fttd_selected)
 		{
@@ -35,8 +34,10 @@ static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX,
 		else
 		{
 			figh1->aitarget = sim->fttd_last_id;
+			figh1->aifttd = true;
 			sim->fighters[sim->fttd_last_id].aitarget = cpart->tmp;
-			sim->fttd_last_id = cpart->tmp;
+			sim->fighters[sim->fttd_last_id].aifttd = true;
+			sim->fttd_selected = false;
 			return 1;
 		}
 	}
