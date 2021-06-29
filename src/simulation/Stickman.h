@@ -16,6 +16,7 @@ struct playerst
 	int spawnID;         //id of the SPWN particle that spawns it
 	int swaptmp; // hacky solution to FIGH tmp usage conflict
 	int swaptmp2; // hacky solution to FIGH tmp2 usage conflict
+	int pain; // used to let health bars flash yellow when hurt
 	bool aim; // whether to shoot at the cursor next frame or not
 	float aimx; // x component of where to aim
 	float aimy; // y component of where to aim

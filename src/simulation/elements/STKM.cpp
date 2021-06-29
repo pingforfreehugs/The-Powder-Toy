@@ -112,7 +112,11 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	float rocketBootsFeetEffect = 0.15f;
 	float rocketBootsHeadEffectV = 0.3f;// stronger acceleration vertically, to counteract gravity
 	float rocketBootsFeetEffectV = 0.45f;
-
+	int lifethisframe = parts[i].life;
+	
+	if (playerp->pain > 0)
+		playerp->pain -= 1;
+	
 	if (!playerp->fan && parts[i].ctype && sim->IsElementOrNone(parts[i].ctype))
 		Element_STKM_set_element(sim, playerp, parts[i].ctype);
 	playerp->frames++;
@@ -727,6 +731,10 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	Element_STKM_interact(sim, playerp, i, (int)(playerp->legs[12]+0.5), (int)(playerp->legs[13]+0.5));
 	Element_STKM_interact(sim, playerp, i, (int)(playerp->legs[4]+0.5), (int)playerp->legs[5]);
 	Element_STKM_interact(sim, playerp, i, (int)(playerp->legs[12]+0.5), (int)playerp->legs[13]);
+	
+	if (parts[i].life < lifethisframe)
+		playerp->pain = 10;
+	
 	if (!parts[i].type)
 		return 1;
 
@@ -847,6 +855,7 @@ void Element_STKM_init_legs(Simulation * sim, playerst *playerp, int i)
 	playerp->rocketBoots = false;
 	playerp->aim = false;
 	playerp->aifttd = false;
+	playerp->pain = 0;
 }
 
 void Element_STKM_set_element(Simulation *sim, playerst *playerp, int element)

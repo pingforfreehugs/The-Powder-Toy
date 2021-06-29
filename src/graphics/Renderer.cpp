@@ -1576,6 +1576,12 @@ void Renderer::render_parts()
 					glVertex2f(cplayer->legs[8], cplayer->legs[9]);
 					glVertex2f(cplayer->legs[12], cplayer->legs[13]);
 					glEnd();
+					
+					glBegin(GL_LINES);
+					glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+					glVertex2f(fnx-4, fny-4);
+					glVertex2f(fnx+4, fny-4);
+					glEnd();
 #else
 					if (findingElement && findingElement == t)
 					{
@@ -1652,6 +1658,9 @@ void Renderer::render_parts()
 							blendpixel(nx-1, ny+1, colr, colg, colb, 112);
 						}
 					}
+					//health bar
+					draw_line(nx-4, ny-4, nx+4, ny-4, 127, 127, 127, 255);
+					draw_line(nx-(sim->parts[i].life / 25), ny-4, nx+(sim->parts[i].life / 25), ny-4, (cplayer->pain * 25), 255-(cplayer->pain * 25), 0, 255);
 #endif
 				}
 				if(pixel_mode & PMODE_FLAT)
