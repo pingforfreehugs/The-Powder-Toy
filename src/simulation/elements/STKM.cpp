@@ -114,6 +114,14 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	float rocketBootsFeetEffectV = 0.45f;
 	int lifethisframe = parts[i].life;
 	
+	// ammo +1
+	int ignitetype = (parts[i].tmp%8 - parts[i].tmp%2)/2; // igniter particles +2/4/6
+	// heat resist +8/16
+	int coldimmune = (parts[i].tmp%48 - parts[i].tmp%24)/24; // cold immunity +24
+	int toxicimmune = (parts[i].tmp%96 - parts[i].tmp%48)/48; // toxic and electric immune +48
+	int pressureimmune = (parts[i].tmp%192 - parts[i].tmp%96)/96; // pressure immune +96
+	int invincible = (parts[i].tmp%384 - parts[i].tmp%192)/192; // invincibility. +192
+	
 	if (playerp->pain > 0)
 		playerp->pain -= 1;
 	
@@ -122,13 +130,13 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	playerp->frames++;
 
 	//Temperature handling
-	if (parts[i].temp<243)
+	if (parts[i].temp<243 && coldimmune==0)
 		parts[i].life -= 1;
 	if ((parts[i].temp<309.6f) && (parts[i].temp>=243))
 		parts[i].temp += 1;
 
 	//Death
-	if (parts[i].life<1 || (sim->pv[y/CELL][x/CELL]>=4.5f && !playerp->fan) ) //If his HP is less than 0 or there is very big wind...
+	if ((parts[i].life<1 || (sim->pv[y/CELL][x/CELL]>=4.5f && !playerp->fan && pressureimmune==0) ) && invincible==0) //If his HP is less than 0 or there is very big wind...
 	{
 		for (r=-2; r<=1; r++)
 		{
@@ -498,7 +506,7 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 				np = -1;
 			else
 			{
-				int ignitetype = (parts[i].tmp%8 - parts[i].tmp%2)/2; // igniter particles
+				
 				if (!(ignitetype == 0) && RNG::Ref().chance(1, 5))
 					if (ignitetype == 1)
 						np = sim->create_part(-1, rx, ry, PT_FIRE);
@@ -732,6 +740,9 @@ int Element_STKM_run_stickman(playerst *playerp, UPDATE_FUNC_ARGS)
 	Element_STKM_interact(sim, playerp, i, (int)(playerp->legs[4]+0.5), (int)playerp->legs[5]);
 	Element_STKM_interact(sim, playerp, i, (int)(playerp->legs[12]+0.5), (int)playerp->legs[13]);
 	
+	if (invincible==1)
+		parts[i].life = 100;
+	
 	if (parts[i].life < lifethisframe)
 		playerp->pain = 10;
 	
@@ -750,7 +761,7 @@ void Element_STKM_interact(Simulation *sim, playerst *playerp, int i, int x, int
 	r = sim->pmap[y][x];
 	if (r)
 	{
-		if (TYP(r)==PT_SPRK && playerp->elem!=PT_LIGH) //If on charge
+		if (TYP(r)==PT_SPRK && playerp->elem!=PT_LIGH && (sim->parts[i].tmp%96 - sim->parts[i].tmp%48)/48 == 0) //If on charge
 		{
 			sim->parts[i].life -= RNG::Ref().between(32, 51);
 		}
@@ -762,13 +773,13 @@ void Element_STKM_interact(Simulation *sim, playerst *playerp, int i, int x, int
 			heatthresh = 623;
 		else
 			heatthresh = 99999;
-		if (sim->elements[TYP(r)].HeatConduct && (TYP(r)!=PT_HSWC||sim->parts[ID(r)].life==10) && ((playerp->elem!=PT_LIGH && sim->parts[ID(r)].temp>=heatthresh) || sim->parts[ID(r)].temp<=243) && (!playerp->rocketBoots || TYP(r)!=PT_PLSM))
+		if (sim->elements[TYP(r)].HeatConduct && (TYP(r)!=PT_HSWC||sim->parts[ID(r)].life==10) && ((playerp->elem!=PT_LIGH && sim->parts[ID(r)].temp>=heatthresh) || (sim->parts[ID(r)].temp<=243 && (sim->parts[i].tmp%48 - sim->parts[i].tmp%24)/24 == 0)) && (!playerp->rocketBoots || TYP(r)!=PT_PLSM))
 		{
 			sim->parts[i].life -= 2;
 			playerp->accs[3] -= 1;
 		}
 
-		if (sim->elements[TYP(r)].Properties&PROP_DEADLY)
+		if (sim->elements[TYP(r)].Properties&PROP_DEADLY && (sim->parts[i].tmp%96 - sim->parts[i].tmp%48)/48 == 0)
 			switch (TYP(r))
 			{
 				case PT_ACID:
@@ -779,7 +790,7 @@ void Element_STKM_interact(Simulation *sim, playerst *playerp, int i, int x, int
 					break;
 			}
 
-		if (sim->elements[TYP(r)].Properties&PROP_RADIOACTIVE)
+		if (sim->elements[TYP(r)].Properties&PROP_RADIOACTIVE && (sim->parts[i].tmp%96 - sim->parts[i].tmp%48)/48 == 0)
 			sim->parts[i].life -= 1;
 
 		if (TYP(r)==PT_EMBR && !(sim->parts[ID(r)].tmp2==(i+1)))
